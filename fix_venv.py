@@ -15,7 +15,7 @@ replacement_text = "\n".join([
 ])
 
 venv_paths = [
-    "~/.virtualenvs",
+    Path.home() / ".virtualenvs",
 ]
 
 activate_suffixes = [
