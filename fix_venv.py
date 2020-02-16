@@ -28,38 +28,47 @@ if len(sys.argv) != 2:
     exit(1)
 
 venv_to_fix = sys.argv[1]
-p = Path(venv_to_fix)
+
+def find_path(venv_name):
+    p = Path(venv_name)
+
+    if p.exists():
+        return p
+    else:
+        # Not an absolute path, search for it in the venv prefixes
+        for prefix in venv_paths:
+            maybe_p = Path(prefix) / p
+            print(f"Looking for venv in {maybe_p}...")
+
+            if maybe_p.exists():
+                print("Found the venv!")
+                return maybe_p
+
+p = find_path(venv_to_fix)
 
 if not p.exists():
-    for prefix in venv_paths:
-        maybe_p = Path(prefix) / p
-        print(f"Trying {maybe_p}...")
-
-        if maybe_p.exists():
-            print("Found it!")
-            p = maybe_p
-            break
-
-    if not p.exists():
-        print(f"Virtualenv not found: {p}")
-        exit(2)
+    print(f"Virtualenv not found: {p}")
+    exit(2)
 
 if not p.is_dir():
-    print("Pass the directory, not the file")
+    print("Pass the directory, not the file.")
     exit(3)
 
 filename = None
 
-for suffix in activate_suffixes:
-    filepath = p / suffix
-    print(f"Looking for activation file in: {filepath}")
+def find_activate_file(p: Path):
+    for suffix in activate_suffixes:
+        filepath = p / suffix
+        print(f"Looking for activate file in: {filepath}")
 
-    if filepath.exists():
-        print("Found it!")
-        filename = filepath
+        if filepath.exists():
+            print("Found the activate file!")
+            return filepath
+
+filename = find_activate_file(p)
 
 if not filename:
-    print("Couldn\'t find an activation file in the given directory")
+    print("Couldn\'t find an activate file in the given directory")
     exit(4)
 
 print(f"Updating file at {filename}...")
